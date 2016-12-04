@@ -24,12 +24,28 @@ public class Benchmark {
         System.out.println("e.g. : DictionaryBenchmark -dict /tmp/dict.big");
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] argv) throws IOException {
         // TODO Auto-generated method stub
-        if (null == args || 2 > args.length) {
+        if (null == argv || 2 > argv.length) {
             printHelp();
         }
-        String dictpath = args[1];
+        String dictpath  = null;
+        int    querytime = 10 * 1000 * 1000; //default lookup times is 10m
+        for (int i = 0; i < argv.length; i++) {
+            if ("-dict".equals(argv[i])) {
+                if (i == argv.length - 1) {
+                    printHelp();
+                    return;
+                }
+                dictpath = argv[++i];
+            } else if ("-times".equals(argv[i])) {
+                if (i == argv.length - 1) {
+                    printHelp();
+                    return;
+                }
+                querytime = Integer.valueOf(argv[++i]);
+            }
+        }
         System.out.println("Benchmark about {HashMap,DAT,RadixTree,TrieDict} Structures for Dictionary");
         System.out.println("  HashMap: java.util.HashMap");
         System.out.println("  DAT (Double Array Trie): https://github.com/komiya-atsushi/darts-java");
@@ -55,7 +71,7 @@ public class Benchmark {
             bWordList[i] = wordList.get(i).getBytes("UTF-8");
         }
         int n = wordList.size();
-        int times = 10 * 1000 * 1000 / n; // run 10 million lookups
+        int times = querytime / n == 0 ? 1 : querytime / n ;
         System.gc();
         long size3 = s_runtime.totalMemory() - s_runtime.freeMemory();
         System.out.println("a. Dictionary Size:" + wordList.size());
@@ -125,9 +141,7 @@ public class Benchmark {
         long qstart2 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
             for (int j = 0; j < n; j++) {
-                if (hashmap.get(wordList.get(j)) == null) {
-                    //throw new RuntimeException("没找到该有的词");
-                }
+                hashmap.get(wordList.get(j));
             }
         }
         long qend2 = System.currentTimeMillis();
@@ -135,9 +149,7 @@ public class Benchmark {
         long qstart3 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
             for (int j = 0; j < n; j++) {
-                if (tDict.getIdFromValueBytes(bWordList[j], 0, bWordList[j].length) == -1) {
-                    //throw new RuntimeException("没找到该有的词");
-                }
+                tDict.getIdFromValueBytes(bWordList[j], 0, bWordList[j].length);
             }
         }
         long qend3 = System.currentTimeMillis();
@@ -145,9 +157,7 @@ public class Benchmark {
         long qstart4 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
             for (int j = 0; j < n; j++) {
-                if (tree.getValueForExactKey(wordList.get(j)) == null) {
-                    //throw new RuntimeException("没找到该有的词");
-                }
+                tree.getValueForExactKey(wordList.get(j));
             }
         }
         long qend4 = System.currentTimeMillis();

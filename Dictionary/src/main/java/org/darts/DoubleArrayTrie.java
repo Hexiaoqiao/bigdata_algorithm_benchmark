@@ -143,16 +143,7 @@ public class DoubleArrayTrie {
 			begin = pos - siblings.get(0).code;
 			if (allocSize <= (begin + siblings.get(siblings.size() - 1).code)) {
 				// progress can be zero
-        /*
-				double l = (1.05 > 1.0 * keySize / (progress + 1)) ? 1.05 : 1.0
-					* keySize / (progress + 1);
-        System.out.println(keySize);
-        System.out.println(progress);
-        System.out.println(l);
-        System.out.println(allocSize);
-        System.out.println(Integer.MAX_VALUE);
-        */
-  			resize((int) (allocSize * 2));
+  			resize((int) (allocSize * 1.2));
 			}
 
 			if (used[begin])
