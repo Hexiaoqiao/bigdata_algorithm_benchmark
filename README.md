@@ -23,5 +23,5 @@ java version "1.7.0_76" Java HotSpot(TM) 64-Bit Server VM (build 24.76-b04, mixe
 A. Create directory for new Data Structure.  
 B. Include the classic implements, open source is best.  
 C. Add new Benchmark code for differet implements.  
-D. Mark sure to upload testset if need be.
+D. Mark sure to upload testset if need be.  
 E. Update README with the test result following #Dictionary.
