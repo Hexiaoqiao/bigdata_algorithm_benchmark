@@ -9,7 +9,7 @@ java version "1.7.0_76" Java HotSpot(TM) 64-Bit Server VM (build 24.76-b04, mixe
 
 ## Dictionary
 |TestSet| Data Structure| Memory Footprint (byte) | Build Time(ms) | Retrieval Time(ms) |
-|:--|:--| ----: | -----:| -----:| ---: |
+|:--| ----: | -----:| -----:| ---: |
 |endict 200K|DAT      | 536384  |  2| 58  |
 |endict 200K|HashMap  | 11686512| 65| 89  |
 |endict 200K|TrieDict | 31168584|575| 765 |

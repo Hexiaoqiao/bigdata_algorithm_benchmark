@@ -16,6 +16,7 @@ import org.darts.DoubleArrayTrie;
 import com.googlecode.concurrenttrees.radix.ConcurrentRadixTree;
 import com.googlecode.concurrenttrees.radix.node.NodeFactory;
 import com.googlecode.concurrenttrees.radix.node.concrete.DefaultCharArrayNodeFactory;
+import com.dictionary.trie.TrieDictionaryTest;
 
 public class Benchmark {
 
@@ -30,7 +31,7 @@ public class Benchmark {
             printHelp();
         }
         String dictpath  = null;
-        int    querytime = 10 * 1000 * 1000; //default lookup times is 10m
+        int    querytime = 10 * 10 * 1000; //default lookup times is 10m
         for (int i = 0; i < argv.length; i++) {
             if ("-dict".equals(argv[i])) {
                 if (i == argv.length - 1) {
@@ -51,6 +52,7 @@ public class Benchmark {
         System.out.println("  DAT (Double Array Trie): https://github.com/komiya-atsushi/darts-java");
         System.out.println("  RadixTree: https://github.com/npgall/concurrent-trees");
         System.out.println("  TrieDict (Dictionary in Kylin): http://kylin.apache.org/blog/2015/08/13/kylin-dictionary");
+        System.out.println("  TrieDictTest: One implement about DAT");
         System.out.println("================Test Result================");
 
         Runtime s_runtime = Runtime.getRuntime();
@@ -59,9 +61,10 @@ public class Benchmark {
         BufferedReader br = new BufferedReader(
                 new InputStreamReader(new FileInputStream(dictpath)));
         String line = null;
+        //int num = 0;
         while ((line = br.readLine()) != null) {
             wordList.add(line);
-
+            //if (num > 50000)
         }
         br.close();
         System.gc();
@@ -112,11 +115,21 @@ public class Benchmark {
         long end4 = System.currentTimeMillis();
         System.gc();
         long size7 = s_runtime.totalMemory() - s_runtime.freeMemory();
+
+        long start5 = System.currentTimeMillis();
+        TrieDictionaryTest tdt = new TrieDictionaryTest();
+        for (String s : wordList)
+            tdt.insert(s);
+        long end5 = System.currentTimeMillis();
+        System.gc();
+        long size8 = s_runtime.totalMemory() - s_runtime.freeMemory();
+
         System.out.println("b. Build Time (ms) :");
         System.out.println("   DAT       : " + (end1 - start1));
         System.out.println("   HashMap   : " + (end2 - start2));
         System.out.println("   RadixTree : " + (end3 - start3));
         System.out.println("   TrieDict  : " + (end4 - start4));
+        System.out.println("   TDT       : " + (end5 - start5));
         System.out.println("--------");
         System.out.println();
 
@@ -125,6 +138,7 @@ public class Benchmark {
         System.out.println("   HashMap   : " + (size5 - size4));
         System.out.println("   RadixTree : " + (size6 - size5));
         System.out.println("   TrieDict  : " + (size7 - size6));
+        System.out.println("   TDT       : " + (size8 - size7));
         System.out.println("--------");
         System.out.println();
 
@@ -132,7 +146,7 @@ public class Benchmark {
         for (int i = 0; i < times; i++) {
             for (int j = 0; j < n; j++) {
                 if (dat.exactMatchSearch(wordList.get(j)) == -1) {
-                    //throw new RuntimeException("没找到该有的词");
+                    //System.out.println(wordList.get(j));
                 }
             }
         }
@@ -141,7 +155,9 @@ public class Benchmark {
         long qstart2 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
             for (int j = 0; j < n; j++) {
-                hashmap.get(wordList.get(j));
+                if (null == hashmap.get(wordList.get(j)) ) {
+                    //System.out.println(wordList.get(j));
+                }
             }
         }
         long qend2 = System.currentTimeMillis();
@@ -149,7 +165,11 @@ public class Benchmark {
         long qstart3 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
             for (int j = 0; j < n; j++) {
-                tDict.getIdFromValueBytes(bWordList[j], 0, bWordList[j].length);
+                try {
+                    tDict.getIdFromValueBytes(bWordList[j], 0, bWordList[j].length);
+                } catch (IllegalArgumentException iae) {
+                    //System.out.println(bWordList[i]);
+                }
             }
         }
         long qend3 = System.currentTimeMillis();
@@ -157,16 +177,32 @@ public class Benchmark {
         long qstart4 = System.currentTimeMillis();
         for (int i = 0; i < times; i++) {
             for (int j = 0; j < n; j++) {
-                tree.getValueForExactKey(wordList.get(j));
+                if( null == tree.getValueForExactKey(wordList.get(j)) ) {
+                    //System.out.println(wordList.get(j));
+                }
             }
         }
         long qend4 = System.currentTimeMillis();
+
+        int res = 0;
+        long qstart5 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            for (int j = 0; j < n; j++) {
+                if( -1 == tdt.getValue(wordList.get(j)) ) {
+                    //System.out.println(wordList.get(j));
+                    res = res + 1;
+                }
+            }
+        }
+        long qend5 = System.currentTimeMillis();
+        //System.out.println(res);
 
         System.out.println("d. Retrieval Performance for " + (times * n) + " query times (ms) :");
         System.out.println("   DAT       : " + (qend1 - qstart1));
         System.out.println("   HashMap   : " + (qend2 - qstart2));
         System.out.println("   TrieDict  : " + (qend3 - qstart3));
         System.out.println("   RadixTree : " + (qend4 - qstart4));
+        System.out.println("   TDT       : " + (qend5 - qstart5));
         System.out.println("================Test Result================");
     }
 }
